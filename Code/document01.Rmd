@@ -1,0 +1,111 @@
+IRS Migration Project
+========================================================
+
+There are three research questions to address in this project:
+1. What aspects of an area pull people in?
+  * Do people move to areas with a higher income?
+  * Do people move to areas with greater racial/ethnic diveristy
+  * Do people move to areas with greater education levels
+  * Do people move to areas with greater employment growth
+  * Do people move to areas with a lower unemployment rate
+  * Do people move to areas that are more urban
+  * Do people move to areas that are part of a metropolitan/megapolitan/global city area
+2. What aspects of an area push people out? (same sorts of things as above)
+3. Can a network be seen indicating a national hierarchy mirroring the global hierarchy of cities?
+  * Given the origin-destination pairs of the data what is the national county/metro hierarchy?
+  * Are there sub-national hierarchies? (Are poeple from the south moving to other specific areas in the south, ect)
+4. How have these things changed over time?
+  * How have things changed since the recession?
+The data to be used for this project comes from the IRS migration files
+
+
+What aspects of an area pull people in?
+--------------
+
+```{r setup, echo=FALSE, results='hide', cache=TRUE}
+library(ggplot2)
+library(lme4)
+library(randomForest)
+library(rpart)
+attach(mig3)
+```
+
+```{r spatial, echo=FALSE, results='markup', comment=""}
+
+
+# need to disagregate the data - there is too much going on, or rewrite the controls
+```
+
+```{r table, results='markup', comment="", echo=FALSE}
+library(xtable)
+tab1 <- full3[which (full3$year==2004), c(13, 2, 10, 11)]
+tab1.2004 <- head(tab1[order(tab1$Mrank),])
+
+tab1 <- full3[which (full3$year==2005), c(13, 2, 10, 11)]
+tab1.2005 <- head(tab1[order(tab1$Mrank),])
+
+tab1 <- full3[which (full3$year==2006), c(13, 2, 10, 11)]
+tab1.2006 <- head(tab1[order(tab1$Mrank),])
+
+tab1 <- full3[which (full3$year==2007), c(13, 2, 10, 11)]
+tab1.2007 <- head(tab1[order(tab1$Mrank),])
+
+tab1 <- full3[which (full3$year==2008), c(13, 2, 10, 11)]
+tab1.2008 <- head(tab1[order(tab1$Mrank),])
+
+tab1 <- full3[which (full3$year==2009), c(13, 2, 10, 11)]
+tab1.2009 <- head(tab1[order(tab1$Mrank),])
+
+tab <- cbind(tab1.2004, tab1.2005, tab1.2006)
+tab.1 <- cbind(tab1.2007, tab1.2008, tab1.2009)
+
+xtable(tab.1)
+```
+
+
+
+```{r hierarchical modelsOD}
+mod1 <- lmer(Tmig ~ 1 + (1 | year2), data= mig3)
+#mod2 <- lmer(Tmig ~ T_EMP_D + D_jobsLT29y + D_jobs30_54 + D_jobsGT55 + (1 | year2), data= mig3)
+#mod3 <- lmer(Tmig ~ T_EMP_D + D_Tjobs + (1 | year2), data= mig3)
+#mod4 <- lmer(Tmig ~ D_earnGT3333 + D_earnTo3333 + D_earnLT1250 + (1 | year2), data= mig3)
+#mod5 <- lmer(Tmig ~ T_EMP_D + D_Tjobs + D_Pop + (1 | year2), data= mig3)
+```
+
+```{r HLMfull3}
+library(lme4)
+mod1 <- lmer(Tmig ~ 1 + (1 | year), data=full3)
+#mod2 <- lmer(Tmig ~ AGI + Conections + T_EMP + (1 | year), data=full3)
+#mod3 <- lmer(Tmig ~ empLT29 + emp30_54 + empGT55 + (1 | year), data=full3)
+#mod3.1 <- lmer(Tmig ~ earnLow +earnMid + earnHigh + (1 | year), data=full3)
+#mod4 <- lmer(Tmig ~ T_EMP + Wages_Sal + Dividend + Interest + (1 | year), data=full3)
+#mod5 <- lmer(Tmig ~ T_EMP + AGI + Conections + (cMig | year), data=full3)
+
+#lm1 <- lm(Tmig ~   Pop+Tmig+Mrank+Crank+Metro+Micro+AGI+Aggr_AGI+Wages_Sal+Dividend+Interest+T_EMP+earnLow+earnMid+earnHigh+Jden+Pden, data=s2004)
+```
+
+
+```{r plots}
+library(ggplot2)
+p <- ggplot(full3, aes(as.factor(year), Tmig))
+p+geom_boxplot()+geom_jitter()
+b <- ggplot(full3, aes(V5, Tmig))
+b+geom_boxplot()+geom_jitter()
+
+boxplot(Tmig ~ year, full3)
+
+panel.cor <- function(x, y, digits=2, prefix="", cex.cor, ...)
+{
+  usr <- par("usr"); on.exit(par(usr))
+  par(usr = c(0, 1, 0, 1))
+  r <- abs(cor(x, y))
+  txt <- format(c(r, 0.123456789), digits=digits)[1]
+  txt <- paste(prefix, txt, sep="")
+  if(missing(cex.cor)) cex.cor <- 0.8/strwidth(txt)
+  text(0.5, 0.5, txt, cex = cex.cor * r)
+}
+pairs(~ T_EMP + Tmig + year + AGI + Mrank + Crank + Conections , data= full3, lower.panel=panel.smooth, upper.panel = panel.cor, pch=10)
+```
+empLT29 + emp30_54 + empGT55 + earnLow +earnMid + earnHigh
+
+

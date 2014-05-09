@@ -1,0 +1,129 @@
+Internal Migration
+========================================================
+
+John Stevens
+
+
+>This paper uses IRS migration data to look at the different factors that pull migrants to certain areas. The factors chosen are determined by neo-classical economic and world systems theories. The results of Poisson models indicate support for the world systems theories over the neo-classical economic theory. 
+
+Introduction
+-----------------
+Migration is a complex system that changes not only the migrant, but the places they migrate to, so an understanding of the pulling factors that attract migrants is of great importance (Castells 2010). The issues of migration are greatest for urban areas as those are the places most migrants move to (Molloy, C. L. Smith, and Wozniak 2011). In looking at the causes of migration and the interaction it has with cities there are two different theoretical orientations that are prominent, one is a neo-classical approach exemplified by Glaeser in his book The Triumph of the City (2011). On the other hand there is the concept of world systems / and world cities, which has a very different conception of why migrants come to specific places (Castells 2010).  This paper follows the lead of Timberlake et. all. (2011) in taking ideas of the global city in applying them to a national level network of geographic space. 
+
+
+```{r readdata, echo=FALSE}
+library(foreign)
+library(plyr)
+
+#Inflows
+irs09_10in <- read.csv("http://www.irs.gov/pub/irs-soi/countyinflow0910.csv")
+  irs09_10in$year <- 2009 # Add year data
+#Concatenate the state and county numbers
+  irs09_10in$codeD <- paste(irs09_10in$State_Code_Dest, irs09_10in$County_Code_Dest, sep="_") 
+  irs09_10in$codeO <- paste(irs09_10in$State_Code_Origin, irs09_10in$County_Code_Origin, sep="_")
+
+irs08_09in <- read.csv("http://www.irs.gov/pub/irs-soi/countyinflow0809.csv")
+  irs08_09in$year <- 2008
+irs08_09in$codeD <- paste(irs08_09in$State_Code_Dest, irs08_09in$County_Code_Dest, sep="_")
+irs08_09in$codeO <- paste(irs08_09in$State_Code_Origin, irs08_09in$County_Code_Origin, sep="_")
+
+irs07_08in <- read.csv("http://www.irs.gov/pub/irs-soi/countyinflow0708.csv")
+  irs07_08in$year <- 2007
+irs07_08in$codeD <- paste(irs07_08in$State_Code_Dest, irs07_08in$County_Code_Dest, sep="_")
+irs07_08in$codeO <- paste(irs07_08in$State_Code_Origin, irs07_08in$County_Code_Origin, sep="_")
+
+irs06_07in <- read.csv("http://www.irs.gov/pub/irs-soi/countyinflow0607.csv")
+  irs06_07in$year <- 2006
+irs06_07in$codeD <- paste(irs06_07in$State_Code_Dest, irs06_07in$County_Code_Dest, sep="_")
+irs06_07in$codeO <- paste(irs06_07in$State_Code_Origin, irs06_07in$County_Code_Origin, sep="_")
+
+irs05_06in <- read.csv("http://www.irs.gov/pub/irs-soi/countyinflow0506.csv")
+  irs05_06in$year <- 2005
+irs05_06in$codeD <- paste(irs05_06in$State_Code_Dest, irs05_06in$County_Code_Dest, sep="_")
+irs05_06in$codeO <- paste(irs05_06in$State_Code_Origin, irs05_06in$County_Code_Origin, sep="_")
+
+irs04_05in <- read.csv("http://www.irs.gov/pub/irs-soi/countyinflow0405.csv")
+  irs04_05in$year <- 2004
+irs04_05in$codeD <- paste(irs04_05in$State_Code_Dest, irs04_05in$County_Code_Dest, sep="_")
+irs04_05in$codeO <- paste(irs04_05in$State_Code_Origin, irs04_05in$County_Code_Origin, sep="_")
+
+county2009 <- read.csv("http://www.irs.gov/pub/irs-soi/09incicsv.csv")
+county2008 <- read.csv("http://www.irs.gov/pub/irs-soi/08incicsv.csv")
+county2007 <- read.csv("http://www.irs.gov/pub/irs-soi/countyincome07.csv")
+county2006 <- read.csv("http://www.irs.gov/pub/irs-soi/countyincome06.csv")
+county2005 <- read.csv("http://www.irs.gov/pub/irs-soi/countyincome05.csv")
+county2004 <- read.csv("http://www.irs.gov/pub/irs-soi/countyincome04.csv")
+
+  county2004$code <- paste(county2004$State_Code, county2004$County_Code, sep="_")
+  county2005$code <- paste(county2005$State_Code, county2005$County_Code, sep="_")
+  county2006$code <- paste(county2006$State_Code, county2006$County_Code, sep="_")
+  county2007$code <- paste(county2007$State_Code, county2007$County_Code, sep="_")
+  county2008$code <- paste(county2008$State_Code, county2008$County_Code, sep="_")
+  county2009$code <- paste(county2009$State_Code, county2009$County_Code, sep="_")
+
+temp1 <- irs04_05in[which (irs04_05in$State_Code_Origin!=96), ]
+temp2 <- temp1[which (temp1$State_Code_Origin!=97), ]
+temp3 <- temp2[which (temp2$County_Code_Origin!=0), ]
+temp4 <- temp3[which (temp3$codeD != temp3$codeO),]
+```
+
+You can also embed plots, for example:
+
+```{r fig.width=7, fig.height=6}
+plot(cars)
+```
+
+References
+Alderson, A. S., and J. Beckfield. 2004. “Power and Position in the World City System.” American Journal of Sociology 109(4):811–51. Retrieved (http://www.jstor.org/stable/10.2307/3568362).
+
+Alderson, A. S., J. Beckfield, and J. Sprague-Jones. 2010. “Intercity Relations and Globalisation: The Evolution of the Global Urban Hierarchy, 1981--2007.” Urban Studies 47(9):1899–1923.
+
+Castells, M. 2010. “Globalisation, Networking, Urbanisation: Reflections on the Spatial Dynamics of the Information Age.” Urban Studies 47(13):2737–45.
+
+Cronon, W. 1991. Nature's metropolis : Chicago and the Great West. New York : W. W. Norton.
+
+Davies, P. S., M. J. Greenwood, and H. Li. 2001. “A conditional logit approach to US state‐to‐state migration.” Journal of Regional Science 41(2):337–60.
+
+Dunn, E. S. 1970. “A Flow Network Image of Urban Structures.” Urban Studies.
+
+Frey, W. H. 1995. “Immigration and Internal Migration IIFlight": A California Case Studyt.” Population and Environment 16(4).
+
+Friedmann, J. 1986. “The world city hypothesis.” Development and Change.
+
+Glaeser, E. 2011. Triumph of the City. Penguin Books.
+
+Isserman, A. M., D. A. Plane, P. A. Rogerson, and P. M. Beaumont. 2010. “Forecasting interstate migration with limited data: a demographic-economic approach.” Journal of the American Statistical Association 80(390):277–85.
+
+Kaplan, G., and S. Schulhofer-Wohl. 2010. Interstate Migration Has Fallen Less Than You Think.
+
+Massey, D. 1993. American apartheid: Segregation and the making of the underclass.
+
+Massey, D. S. et al. 1993. “Theories of International Migration: A Review and Appraisal.” Population and Development Review 19(3):431–66.
+
+Molloy, R., C. L. Smith, and A. K. Wozniak. 2011. “Internal migration in the united states.” 1–47.
+
+Pflieger, G., and C. Rozenblat. 2010. “Introduction. Urban Networks and Network Theory: The City as the Connector of Multiple Networks.”
+
+Plane, D. A. 2010. “Migration space: doubly constrained gravity model mapping of relative interstate separation.” Annals of the Association of American Geographers 74(2):244–56.
+
+Plane, D. A., and G. F. Mulligan. 2010. “Measuring spatial focusing in a migration system.” Demography 34(2):251–62.
+
+Plane, D. A., and P. A. Rogerson. 1986. “Dynamic flow modeling with interregional dependency effects: an application to structural change in the US migration system.” Demography 23(1):91–104.
+
+Ravenstein, E. 1885. “The laws of migration.” Journal of the Statistical Society of London 48(2):167–235.
+
+Sassen, S. 2001. The Global City. Princeton Univ Press.
+
+Smith, D. 1995. “Conceptualising and Mapping the Structure of the World System's City System.” Urban Studies 32(2):287–302.
+
+Smith, D. A., and M. F. TIMBERLAKE. 2001. “World City Networks and Hierarchies, 1977-1997: An Empirical Analysis of Global Air Travel Links.” American Behavioral Scientist 44(10):1656–78.
+
+Taylor, P. 2005. “Leading world cities: Empirical evaluations of urban nodes in multiple networks.” Urban Studies 42(9):1593–1608.
+
+Timberlake, M. et al. 2012. “Testing a Global City Hypothesis: An Assessment of Polarization across US Cities.” City & Community 11(1):74–93.
+
+Voss, P. R., R. B. Hammer, and A. M. Meier. 2010. “Migration analysis: A case study for local public policy.” Population Research and Policy Review 20(6):587–603.
+
+Wallerstein, I. M. 1. 2000. The essential Wallerstein. New York : New Press : Distributed by W.W. Norton.
+
+Wright, R. A., M. Ellis, and M. Reibel. 2007. “The Linkage between Immigration and Internal Migration in Large Metropolitan Areas in the United States.” Economic Geography 73(2):234–54.

@@ -1,0 +1,337 @@
+United States Internal Migration
+========================================================
+
+>This paper uses IRS migration data to look at the different factors that pull migrants to certain areas. The factors chosen are determined by neo-classical economic and world systems theories. The results of Poisson models indicate support for the world systems theories over the neo-classical >economic theory. 
+
+Hypotheses
+------------------
+Based on the above litereature there are two main hypothesis this paper is trying to test. One using the neo-classical migration theories (H1), and the other looking from a world systems / world cities perspective. While dual labor market theory is discussed above it can be argued the dual labor market theory would support both the these hypotheses.
+**H1:** migration will be highest in areas with a high proportion of high wage earners.
+**H2:** metropolitan areas will have higher rates of migration
+
+
+```{r setup1, echo=FALSE, message=FALSE, warning=FALSE}
+library(foreign)
+library(plyr)
+
+#Inflows
+irs09_10in <- read.csv("http://www.irs.gov/pub/irs-soi/countyinflow0910.csv")
+  irs09_10in$year <- 2009 # Add year data
+#Concatenate the state and county numbers
+  irs09_10in$codeD <- paste(irs09_10in$State_Code_Dest, irs09_10in$County_Code_Dest, sep="_") 
+  irs09_10in$codeO <- paste(irs09_10in$State_Code_Origin, irs09_10in$County_Code_Origin, sep="_")
+
+irs08_09in <- read.csv("http://www.irs.gov/pub/irs-soi/countyinflow0809.csv")
+  irs08_09in$year <- 2008
+irs08_09in$codeD <- paste(irs08_09in$State_Code_Dest, irs08_09in$County_Code_Dest, sep="_")
+irs08_09in$codeO <- paste(irs08_09in$State_Code_Origin, irs08_09in$County_Code_Origin, sep="_")
+
+irs07_08in <- read.csv("http://www.irs.gov/pub/irs-soi/countyinflow0708.csv")
+  irs07_08in$year <- 2007
+irs07_08in$codeD <- paste(irs07_08in$State_Code_Dest, irs07_08in$County_Code_Dest, sep="_")
+irs07_08in$codeO <- paste(irs07_08in$State_Code_Origin, irs07_08in$County_Code_Origin, sep="_")
+
+irs06_07in <- read.csv("http://www.irs.gov/pub/irs-soi/countyinflow0607.csv")
+  irs06_07in$year <- 2006
+irs06_07in$codeD <- paste(irs06_07in$State_Code_Dest, irs06_07in$County_Code_Dest, sep="_")
+irs06_07in$codeO <- paste(irs06_07in$State_Code_Origin, irs06_07in$County_Code_Origin, sep="_")
+
+irs05_06in <- read.csv("http://www.irs.gov/pub/irs-soi/countyinflow0506.csv")
+  irs05_06in$year <- 2005
+irs05_06in$codeD <- paste(irs05_06in$State_Code_Dest, irs05_06in$County_Code_Dest, sep="_")
+irs05_06in$codeO <- paste(irs05_06in$State_Code_Origin, irs05_06in$County_Code_Origin, sep="_")
+
+irs04_05in <- read.csv("http://www.irs.gov/pub/irs-soi/countyinflow0405.csv")
+  irs04_05in$year <- 2004
+irs04_05in$codeD <- paste(irs04_05in$State_Code_Dest, irs04_05in$County_Code_Dest, sep="_")
+irs04_05in$codeO <- paste(irs04_05in$State_Code_Origin, irs04_05in$County_Code_Origin, sep="_")
+
+county2009 <- read.csv("http://www.irs.gov/pub/irs-soi/09incicsv.csv")
+county2008 <- read.csv("http://www.irs.gov/pub/irs-soi/08incicsv.csv")
+county2007 <- read.csv("http://www.irs.gov/pub/irs-soi/countyincome07.csv")
+county2006 <- read.csv("http://www.irs.gov/pub/irs-soi/countyincome06.csv")
+county2005 <- read.csv("http://www.irs.gov/pub/irs-soi/countyincome05.csv")
+county2004 <- read.csv("http://www.irs.gov/pub/irs-soi/countyincome04.csv")
+
+  county2004$code <- paste(county2004$State_Code, county2004$County_Code, sep="_")
+  county2005$code <- paste(county2005$State_Code, county2005$County_Code, sep="_")
+  county2006$code <- paste(county2006$State_Code, county2006$County_Code, sep="_")
+  county2007$code <- paste(county2007$State_Code, county2007$County_Code, sep="_")
+  county2008$code <- paste(county2008$State_Code, county2008$County_Code, sep="_")
+  county2009$code <- paste(county2009$State_Code, county2009$County_Code, sep="_")
+
+temp1 <- irs04_05in[which (irs04_05in$State_Code_Origin!=96), ]
+temp2 <- temp1[which (temp1$State_Code_Origin!=97), ]
+temp3 <- temp2[which (temp2$County_Code_Origin!=0), ]
+temp4 <- temp3[which (temp3$codeD != temp3$codeO),]
+
+M2004 <- ddply(temp4, .(codeD), function(df) c(sum(df$Return_Num), sum(df$Exmpt_Num),
+                                              length(df$Return_Num), sum(df$Aggr_AGI), mean(df$year)))
+M2004$Tmig <- M2004$V1 + M2004$V2 #Create Total Migrants Column
+M2004.01 <- M2004[order(-M2004$Tmig),]
+M2004.01$Mrank <- seq(1:2966) # Create Ranking based on Number of Migrants
+M2004.02 <- M2004.01[order(-M2004.01$V3),] 
+M2004.02$Crank <- seq(1:2966) # Create Ranking based on number of connections
+
+#-------2005----------
+#Remove state and nation rows
+temp1 <- irs05_06in[which (irs06_07in$State_Code_Origin!=96), ]
+temp2 <- temp1[which (temp1$State_Code_Origin!=97), ]
+temp3 <- temp2[which (temp2$County_Code_Origin!=0), ]
+temp4 <- temp3[which (temp3$codeD != temp3$codeO),]
+
+M2005 <- ddply(temp4, .(codeD), function(df) c(sum(df$Return_Num), sum(df$Exmpt_Num),
+                                               length(df$Return_Num), sum(df$Aggr_AGI), mean(df$year)))
+M2005$Tmig <- M2005$V1 + M2005$V2 #Create Total Migrants Column
+M2005.01 <- M2005[order(-M2005$Tmig),]
+M2005.01$Mrank <- seq(1:2912) # Create Ranking based on Number of Migrants
+M2005.02 <- M2005.01[order(-M2005.01$V3),] 
+M2005.02$Crank <- seq(1:2912) # Create Ranking based on number of connections
+
+#-------2006----------
+#Remove state and nation rows
+temp1 <- irs06_07in[which (irs06_07in$State_Code_Origin!=96), ]
+temp2 <- temp1[which (temp1$State_Code_Origin!=97), ]
+temp3 <- temp2[which (temp2$County_Code_Origin!=0), ]
+temp4 <- temp3[which (temp3$codeD != temp3$codeO),]
+
+M2006 <- ddply(temp4, .(codeD), function(df) c(sum(df$Return_Num), sum(df$Exmpt_Num),
+                                               length(df$Return_Num), sum(df$Aggr_AGI), mean(df$year)))
+M2006$Tmig <- M2006$V1 + M2006$V2 #Create Total Migrants Column
+M2006.01 <- M2006[order(-M2006$Tmig),]
+M2006.01$Mrank <- seq(1:2964) # Create Ranking based on Number of Migrants
+M2006.02 <- M2006.01[order(-M2006.01$V3),] 
+M2006.02$Crank <- seq(1:2964) # Create Ranking based on number of connections
+
+#-------2007----------
+#Remove state and nation rows
+temp1 <- irs07_08in[which (irs06_07in$State_Code_Origin!=96), ]
+temp2 <- temp1[which (temp1$State_Code_Origin!=97), ]
+temp3 <- temp2[which (temp2$County_Code_Origin!=0), ]
+temp4 <- temp3[which (temp3$codeD != temp3$codeO),]
+
+M2007 <- ddply(temp4, .(codeD), function(df) c(sum(df$Return_Num), sum(df$Exmpt_Num),
+                                               length(df$Return_Num), sum(df$Aggr_AGI), mean(df$year)))
+M2007$Tmig <- M2007$V1 + M2007$V2 #Create Total Migrants Column
+M2007.01 <- M2007[order(-M2007$Tmig),]
+M2007.01$Mrank <- seq(1:2923) # Create Ranking based on Number of Migrants
+M2007.02 <- M2007.01[order(-M2007.01$V3),] 
+M2007.02$Crank <- seq(1:2923) # Create Ranking based on number of connections
+
+#-------2008----------
+#Remove state and nation rows
+temp1 <- irs08_09in[which (irs06_07in$State_Code_Origin!=96), ]
+temp2 <- temp1[which (temp1$State_Code_Origin!=97), ]
+temp3 <- temp2[which (temp2$County_Code_Origin!=0), ]
+temp4 <- temp3[which (temp3$codeD != temp3$codeO),]
+
+M2008 <- ddply(temp4, .(codeD), function(df) c(sum(df$Return_Num), sum(df$Exmpt_Num),
+                                               length(df$Return_Num), sum(df$Aggr_AGI), mean(df$year)))
+M2008$Tmig <- M2008$V1 + M2008$V2 #Create Total Migrants Column
+M2008.01 <- M2008[order(-M2008$Tmig),]
+M2008.01$Mrank <- seq(1:2978) # Create Ranking based on Number of Migrants
+M2008.02 <- M2008.01[order(-M2008.01$V3),] 
+M2008.02$Crank <- seq(1:2978) # Create Ranking based on number of connections
+
+#-------2009----------
+#Remove state and nation rows
+temp1 <- irs09_10in[which (irs06_07in$State_Code_Origin!=96), ]
+temp2 <- temp1[which (temp1$State_Code_Origin!=97), ]
+temp3 <- temp2[which (temp2$County_Code_Origin!=0), ]
+temp4 <- temp3[which (temp3$codeD != temp3$codeO),]
+
+M2009 <- ddply(temp4, .(codeD), function(df) c(sum(df$Return_Num), sum(df$Exmpt_Num),
+                                               length(df$Return_Num), sum(df$Aggr_AGI), mean(df$year)))
+M2009$Tmig <- M2009$V1 + M2009$V2 #Create Total Migrants Column
+M2009.01 <- M2009[order(-M2009$Tmig),]
+M2009.01$Mrank <- seq(1:2965) # Create Ranking based on Number of Migrants
+M2009.02 <- M2009.01[order(-M2009.01$V3),] 
+M2009.02$Crank <- seq(1:2965) # Create Ranking based on number of connections
+
+
+inflows <- rbind(M2004.02, M2005.02, M2006.02, M2007.02, M2008.02, M2009.02)
+
+#Merge County and Aggregated Inflows
+#-------
+m2009 <- merge(M2009.02, county2009,
+                by.x="codeD", by.y="code")
+m2008 <- merge(M2008.02, county2009,
+               by.x="codeD", by.y="code")
+m2007 <- merge(M2007.02, county2009,
+               by.x="codeD", by.y="code")
+m2006 <- merge(M2006.02, county2009,
+               by.x="codeD", by.y="code")
+m2005 <- merge(M2005.02, county2009,
+               by.x="codeD", by.y="code")
+m2004 <- merge(M2004.02, county2009,
+               by.x="codeD", by.y="code")
+
+
+whole <- rbind(m2009, m2008, m2007, m2006, m2005, m2004)
+names(whole) <- c("codeD", "Return_Num", "Exmpt_Num", "Conections", "Aggr_AGI", "year", "Tmig", "Mrank", "Crank", "StateC", "CountyC", "StateAbbr", "CName", "TReturn", "TExmpt", "AGI", "Wages_Sal", "Dividend", "Interest")
+
+fData <- read.csv("/Volumes/USB DISK/IRSmig/Tabular data/states/test1.csv")
+
+full2 <- merge(whole, fData,
+               by.x=c("year", "StateAbbr", "CountyC"),
+               by.y=c("V19", "state", "COUNTYFP00"), all.x=T)
+
+names(full2) <- c("year", "StateAbbr", "CountyC","codeD", "Return_Num", "Exmpt_Num", "Conections", "Aggr_AGI",  "Tmig", "Mrank",
+                  "Crank", "StateC", "CName", "TReturn", "TExmpt", "AGI", "Wages_Sal",
+                  "Dividend", "Interest", "x", "T_EMP", "empLT29",
+                  "emp30_54", "empGT55", "earnLow", "earnMid", "earnHigh",
+                  "workWhite", "workBlack", "workAIAN", "workAsian", "workMult",
+                  "workNLatino", "workLatino", "LTHS", "HS", "AS", "BS")
+
+full3 <- full2[which (full2$CountyC!=0), ]
+
+mMig <- tapply(full3$Tmig, full3$year, mean)
+full3$mMig  <-  mMig[as.character(full3$year)]
+full3$cMig <- full3$Tmig - full3$mMig
+full3$Pop <- full3$TReturn + full3$TExmpt
+
+#Create FIPS Codes
+#-------------
+full4 <- full3
+full4$StateFIPS <- ifelse(nchar(full4$StateC) == 1,
+                          paste(0, full4$StateC, sep = ""), 
+                          full4$StateC)
+
+full4$CFIPS1 <-  ifelse (nchar(full4$CountyC) ==1, 
+                         paste(0, full4$CountyC, sep = ""), 
+                         full4$CountyC)
+
+full4$CFIPS3 <-  ifelse (nchar(full4$CFIPS1) == 2,
+                         paste(0, full4$CFIPS1, sep = ""),
+                         full4$CFIPS1)
+
+full4$FIPS <- paste(full4$StateFIPS, full4$CFIPS3, sep = "")
+
+keepFields <- c("GEOID10", "OBJECTID", "NAMELSAD10","FUNCSTAT10", "ALAND10", "INTPTLAT10", "INTPTLON10", 
+                "year", "Pop", "Tmig", "Mrank", "Crank", "Metro", "Micro", "AGI", "Aggr_AGI", 
+                "Wages_Sal", "Dividend", "Interest", "Conections",
+                "T_EMP", "earnLow", "earnMid", "earnHigh", "Jden", "Pden", "empLT29",
+                "emp30_54", "empGT55")
+
+
+shp <- read.dbf("/Volumes/USB DISK/IRSmig/GIS/SHP/2010County.dbf") 
+s2004 <- merge(shp, full4[which (full4$year==2004),], by.x="GEOID10", by.y = "FIPS", all.x=T)
+s2004$Jden <- s2004$T_EMP / s2004$ALAND10
+s2004$Pden <- s2004$Pop / s2004$ALAND10
+s2004.01 <- s2004[keepFields]
+
+s2004 <- merge(shp, full4[which (full4$year==2005),], by.x="GEOID10", by.y = "FIPS", all.x=T)
+s2004$Jden <- s2004$T_EMP / s2004$ALAND10
+s2004$Pden <- s2004$Pop / s2004$ALAND10
+s2005.01 <- s2004[keepFields]
+
+s2004 <- merge(shp, full4[which (full4$year==2006),], by.x="GEOID10", by.y = "FIPS", all.x=T)
+s2004$Jden <- s2004$T_EMP / s2004$ALAND10
+s2004$Pden <- s2004$Pop / s2004$ALAND10
+s2006.01 <- s2004[keepFields]
+
+s2004 <- merge(shp, full4[which (full4$year==2007),], by.x="GEOID10", by.y = "FIPS", all.x=T)
+s2004$Jden <- s2004$T_EMP / s2004$ALAND10
+s2004$Pden <- s2004$Pop / s2004$ALAND10
+s2007.01 <- s2004[keepFields]
+
+s2004 <- merge(shp, full4[which (full4$year==2008),], by.x="GEOID10", by.y = "FIPS", all.x=T)
+s2004$Jden <- s2004$T_EMP / s2004$ALAND10
+s2004$Pden <- s2004$Pop / s2004$ALAND10
+s2008.01 <- s2004[keepFields]
+
+s2004 <- merge(shp, full4[which (full4$year==2009),], by.x="GEOID10", by.y = "FIPS", all.x=T)
+s2004$Jden <- s2004$T_EMP / s2004$ALAND10
+s2004$Pden <- s2004$Pop / s2004$ALAND10
+s2009.01 <- s2004[keepFields]
+
+newF <- rbind(s2004.01, s2005.01, s2006.01, s2007.01, s2008.01, s2009.01)
+```
+   
+Methodology
+------------------
+The primary statistical method used for analysis is a Poisson model. While there are multiple year in the data set and a multi-level model was considered, upon investigating the data it was found that there was no significant year to year difference in the number of internal migrants.  A Poisson model is a special generalized linear model for dealing with count data, such as the number of people moving from one place to another. Several different models will be run, adding more nuanced covariates to determine the precise nature of their correlation to internal migration.
+
+
+Data
+-----------
+The data for this project comes from the Internal Revenue Service (IRS).  The IRS yearly releases County-to-County migration flows based on the information they receive from individuals filing taxes.  The IRS compares the zip codes of each individual's current tax form to their previous tax form looking at the zip code.  If the zip code does not match from year to year this individual is counted as a migrant. This data is considered the best U.S. internal migration data available {Molloy:2011wy}.  The largest limitation with this data is that it is limited to only those individuals who filed tax paper work. While this does represent a non-random omission in the data roughly 87% of the American population files taxes with the IRS {Molloy:2011wy}, so the generalizability of the data models will have to be limited to the population of tax filers.
+This data has been used a number of times over the years, usually looking at the migration flows between different states {Davies:2001vl, Plane:1986ud, Isserman:2010vz, Molloy:2011wy, Kaplan:2010vm, Plane:2010tl, Voss:2010wt}. The dependent variable is the total amount of incoming internal migration.  This was generated from the IRS data on number of returns and exemptions filed for each year. The dependent variables include the total number of jobs, the total population, the density of both jobs and population, average adjusted gross income, wages and salaries, income categories of workers, metropolitan status of the county, and number of counties sending migrants to the county.
+Some of these variables came from sources other than the IRS data. All of the variables dealing with jobs (total number of jobs, and income categories of jobs come from the census bureau’s Longitudinal Economic and Household Dynamic (LEHD) data set. The LEHD is collected annually from counties. The metro areas and density were derived from census TIGER shp files.
+
+
+Analysis
+-------------
+```{r model, echo=FALSE, message=FALSE, warning=FALSE}
+mod1 <- glm(log(Tmig) ~ T_EMP + Wages_Sal, data=newF, family=poisson(link=log)) # General model to see effect of work and wages
+
+mod2 <- glm(log(Tmig) ~ T_EMP + Wages_Sal + Jden + Pden, data=newF, family=poisson(link=log)) # What added effect does density play
+
+mod3 <- glm(log(Tmig) ~ T_EMP + Wages_Sal + Jden + Pden + earnLow  + earnHigh, data=newF, family=poisson(link=log)) # What added do different income earners play
+
+mod4 <- glm(log(Tmig) ~ T_EMP + Wages_Sal + Dividend + Interest + Jden + Pden + earnLow  + earnHigh, data=newF, family=poisson(link=log)) # What added do different income types play
+
+mod5 <- glm(log(Tmig) ~ T_EMP + Wages_Sal + earnLow + earnHigh + Conections, data=newF, family=poisson(link=log)) # What about connections to other areas
+
+mod6 <- glm(log(Tmig) ~ T_EMP + Wages_Sal + Jden + Pden + earnLow + earnHigh + Metro, data=newF, family=poisson(link=log)) # How about metro areas
+```
+
+The first model (**Table 1**) shows that both the number of jobs has a negative correlation with migration while the wages in the area have a positive relationship with migration. The next model (**Table 2**) adds population and employment density. The addition of these covariates renders total employment non-significant, while the wages remains highly significant. The population density is also positively related to the number of migrants. Model three adds the number of jobs in different earnings categories. Low earnings are defined as less that $1,250 a month, or less than $15,000 per year. High earners in this data set are those making more that $3,333 per month, or about $40,000 per year. Both of these income based measures are being compared to the middle range (of $15K - $40K per year), and have a significant negative correlation with migration. Again wages maintains a significant positive correlation, this time joined by total employment which is also significant. 
+
+**Table 1: Model Results**
+Covariates       | Model 1 | Model 2 | Model 3 | Model 4 | Model 5 | Model 6 
+-----------------|---------|---------|---------|---------|---------|---------
+Intercept        |```r mod1$coefficents[1]``` ``***```| ```r mod2$coefficents[1]``` ``***```|```r mod3$coefficents[1]``` ```***```| ```r mod4$coefficents[1]``` ```***```|```r mod5$coefficents[1]``` ```***```|```r mod2$coefficents[1]``` ```***```
+Total Employment|
+Wages  || | | | |
+Job Dens. || | | | |
+Pop Dens.  || | | | |
+High Earnings || | | | |
+Low Earnings || | | | |
+Dividends || | | | |
+Interest || | | | |
+Metro Area | | | | | |
+RMSE| ```r sqrt(mean(mod1$residual^2))```|```r sqrt(mean(mod2$residual^2))```|```r sqrt(mean(mod3$residual^2))```| ```r sqrt(mean(mod4$residual^2))```| ```r sqrt(mean(mod5$residual^2))```|```r sqrt(mean(mod6$residual^2))```
+```Signif. codes: ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05``` 
+
+
+Model 4 adds the average income based on dividends and interest, though neither are significant. Model 5 adds the number of connections, the number of different places that are sending migrants to that particular county, which is highly significant in a positive direction. The same result is given in model 6 with the addition of the binary indicator of being in a census designated metropolitan area.
+
+In all the variables that show significant positive correlation with migration are counties that have a high population density, or are considered "Metro" areas, and the number of different sending counties. Higher wages, and greater employment are both associated with lower amounts of internal migration.
+
+
+```{r table12, echo=FALSE, results='asis'}
+# library(xtable)
+# print(xtable(mod1, caption = "Model 1 Results", type='html'))
+# print(xtable(mod2, type='HTML'))
+```
+
+
+```{r natGrap, echo=FALSE, warning=FALSE, message=FALSE, fig.height=7, fig.width=6}
+library(ggplot2)
+#Pull National Level data
+nat2009 <- irs07_08in[1:4,]
+  nat2009$Year <- 2009
+nat2008 <- irs08_09in[1:4,]
+  nat2008$Year <- 2008
+nat2007 <- irs07_08in[1:4,]
+  nat2007$Year <- 2007
+nat2006 <- irs06_07in[1:4,]
+  nat2006$Year <- 2006
+nat2005 <- irs05_06in[1:4,]
+  nat2005$Year <- 2005
+nat2004 <- irs04_05in[1:4,]
+  nat2004$Year <- 2004
+
+
+nat <- rbind(nat2009, nat2008, nat2007, nat2006, nat2005, nat2004)
+nat$Mig <- nat$Return_Num + nat$Exmpt_Num
+n<-ggplot(nat,aes(x=Year,y=Mig,group=County_Name, colour=County_Name)) # Plot the National Data by type of migration
+n+geom_line()
+```
+
+
+Discussion
+-------------
+Overall the total migration in the U.S. in the past several years has followed the general declining trend it has had since the 1980s {Molloy:2011wy}. In the last several years there has been no significant deviation from the overall trend. In evaluating the different hypotheses put forward in this paper we find evidence in opposition to the neo-classical economic, and dual labor market theories which suggest that areas of high wages should draw more migrants. The Poisson models indicate the opposite may by true, and high wages work to keep people out of certain areas.
+We do however find some support for the world systems / world cities propositions that being a city with connections with other areas are what is needed to draw migrants. This could be studied more effectively using network analysis techniques such as those used by other world cities researchers (Alderson, Timberlake and Smith). This would allow for a more explicit understanding of the nature of centrality, or betweeness and how the overall shape of the U.S. urban hierarchy is arranged. Another better way to look at this question by with the use of gravity models, such as those used by Plane and others.
